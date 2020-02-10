@@ -15,24 +15,7 @@ mainScreen::mainScreen(QLabel *parent, QString PATH) : QLabel(parent),PATH(PATH)
     totalWidth = 0;
     isPlaying = false;
 
-    for(int i = 0;i<4;i++)
-    {
-        mpvWidget *vp = new mpvWidget(this);
-        vp->resize(1920,1080);
-        vp->move(totalWidth,0);
-        vp->setLoop(false);
-        vp->setProperty("keep-open",true);
-        vp->setProperty("mute",true);
-        vps.push_back(vp);
-        totalWidth+=vp->width();
-        if(vp->x()==1920)
-        {
-            isPlaying = true;
-            mainVp = vp;
-        }
 
-
-    }
 
 
 
@@ -56,7 +39,7 @@ void mainScreen::startVideos()
         vp->show();
         vp->setProperty("pause", true);
         vp->loadFilePaused(PATH+contentList[i]);
-        vp->raise();
+      // vp->raise();
     }
 }
 
@@ -202,6 +185,7 @@ void mainScreen::loadContent(QStringList content)
         vp->setProperty("keep-open",true);
         vp->setProperty("mute",true);
         vps.push_back(vp);
+        vp->setAttribute( Qt::WA_TransparentForMouseEvents );
         totalWidth+=vp->width();
         if(vp->x()==1920)
         {
@@ -231,4 +215,14 @@ void mainScreen::keyPressEvent(QKeyEvent *ev)
         moveVideo(-10);
 
     }
+}
+
+
+
+
+void mainScreen::mousePressEvent(QMouseEvent *event)
+{
+
+emit forceStop();
+
 }

@@ -83,8 +83,25 @@ int main(int argc, char *argv[])
     ms->setGeometry(a.screens()[0]->geometry().x(),a.screens()[0]->geometry().y(),1920,1080);
    ms->showFullScreen();
 
+   a.connect(ms,SIGNAL(forceStop()),&a,SLOT(closeAllWindows()));
+
     ACR122U *rfidWatcher = new ACR122U();
     a.connect(rfidWatcher,SIGNAL(getUID(QString)),ms,SLOT(getUID(QString)));
+
+
+/*
+    if(DEBUG)
+    {
+        QPushButton *pb0 = new QPushButton(ms);
+        pb0->move(0,0);
+        pb0->resize(200,200);
+        pb0->setText("close app");
+        a.connect(pb0,SIGNAL(clicked(bool)),&a,SLOT(closeAllWindows()));
+        pb0->show();
+        pb0->raise();
+        pb0->setWindowFlags(Qt::WindowStaysOnTopHint);
+    }
+*/
 
 
     return a.exec();

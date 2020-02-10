@@ -31,6 +31,10 @@ private slots:
 
 protected:
      void keyPressEvent(QKeyEvent *ev);
+     void mousePressEvent(QMouseEvent *event);
+
+signals:
+    void forceStop(void);
 
 };
 
