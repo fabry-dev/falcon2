@@ -16,7 +16,7 @@ mainScreen::mainScreen(QLabel *parent, QString PATH) : QLabel(parent),PATH(PATH)
     isPlaying = false;
 
 
-
+    getUID("9723E0DF9000");
 
 
 }
