@@ -240,7 +240,7 @@ void mainScreen::loadContent(QStringList content)
         QPropertyAnimation *anim = new QPropertyAnimation(vp, "pos");
         anim->setDuration(ANIM_DURATION);
         anim->setEasingCurve(QEasingCurve::Linear);
-       // connect(anim,SIGNAL(finished()),this,SLOT(checkVideoPosition()));
+        // connect(anim,SIGNAL(finished()),this,SLOT(checkVideoPosition()));
         anims.push_back(anim);
     }
     QTimer::singleShot(100, this, SLOT(startVideos()));
@@ -266,7 +266,17 @@ void mainScreen::keyPressEvent(QKeyEvent *ev)
 }
 
 
+void mainScreen::goBackward(void)
+{
+    moveVideo(ANIM_MAG);
 
+}
+
+void mainScreen::goForward(void)
+{
+    moveVideo(-ANIM_MAG);
+
+}
 
 void mainScreen::mousePressEvent(QMouseEvent *event)
 {

@@ -3,13 +3,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#define max_top_count 5
 
 serialWatcher::serialWatcher(QObject *parent)
 
     : QObject(parent)
 {
 
-    specialCounter = 0;
+    top_count = 0;
     port = new QSerialPort;
     port->setPortName("/dev/ttyACM0");
 
@@ -52,13 +53,28 @@ void serialWatcher::readData()
 
     if(b==155)
     {
-        qDebug()<<"forward";
-        emit goForward();
+        if(top_count<max_top_count)
+        {
+            top_count++;
+            if(top_count == max_top_count)
+            {
+                top_count = 0;
+                emit goForward();
+            }
+        }
+
     }
     else if(b==255)
     {
-        qDebug()<<"backward";
-        emit goBackward();
+        if(top_count>-max_top_count)
+        {
+            top_count--;
+            if(top_count == -max_top_count)
+            {
+                top_count = 0;
+                emit goBackward();
+            }
+        }
     }
 
 }

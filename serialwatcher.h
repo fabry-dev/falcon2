@@ -21,7 +21,7 @@ public:
     ~serialWatcher();
 private:
     QSerialPort *port;
-    int specialCounter;
+    int top_count;
 
 private slots:
     void readData();

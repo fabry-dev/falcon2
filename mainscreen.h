@@ -30,6 +30,8 @@ private slots:
     void startVideos();
     void getUID(QString uid);
     void checkVideoPosition(void);
+    void goBackward(void);
+    void goForward(void);
 
 protected:
      void keyPressEvent(QKeyEvent *ev);
