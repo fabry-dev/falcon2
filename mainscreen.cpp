@@ -3,7 +3,7 @@
 #include "qdebug.h"
 #include "qpainter.h"
 
-#define ANIM_MAG 1920/20
+#define ANIM_MAG 1920/40
 #define ANIM_DURATION 100
 
 
