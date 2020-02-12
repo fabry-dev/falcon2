@@ -7,6 +7,7 @@
 #include "qlabel.h"
 #include "mpvwidget.h"
 #include "qtimer.h"
+#include "qpropertyanimation.h"
 
 class mainScreen : public QLabel
 {
@@ -17,6 +18,7 @@ public:
 private:
     QString PATH;
     std::vector<mpvWidget*> vps;
+    std::vector<QPropertyAnimation*> anims;
     mpvWidget *mainVp;
     bool isPlaying;
     int totalWidth;
@@ -27,6 +29,7 @@ private:
 private slots:
     void startVideos();
     void getUID(QString uid);
+    void checkVideoPosition(void);
 
 protected:
      void keyPressEvent(QKeyEvent *ev);

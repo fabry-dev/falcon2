@@ -3,7 +3,8 @@
 #include "qdebug.h"
 #include "qpainter.h"
 
-#include "qpropertyanimation.h"
+#define ANIM_MAG 1920/20
+#define ANIM_DURATION 100
 
 
 mainScreen::mainScreen(QLabel *parent, QString PATH,bool DEBUG) : QLabel(parent),PATH(PATH),DEBUG(DEBUG)
@@ -39,7 +40,7 @@ void mainScreen::startVideos()
         vp->show();
         vp->setProperty("pause", true);
         vp->loadFilePaused(PATH+contentList[i]);
-      // vp->raise();
+        // vp->raise();
     }
 }
 
@@ -49,6 +50,14 @@ void mainScreen::moveVideo(int dx)
 
     if(!isPlaying)
     {
+
+        for(auto anim:anims)
+        {
+            if(anim->state()==QAbstractAnimation::Running)//do not move if one animation is still going.
+                return;
+        }
+
+
         for(auto vp:vps)
         {
             if((vp->pos().x()>1920) && (vp->pos().x()+dx<=1920)&&(mainVp!=vp))
@@ -70,24 +79,27 @@ void mainScreen::moveVideo(int dx)
             else
                 vp->show();
 
-            QPropertyAnimation *appearance1 = new QPropertyAnimation(vp, "pos");
-            appearance1->setDuration(200);
-            appearance1->setStartValue(vp->pos());
-            appearance1->setEndValue(QPoint(vp->x()+dx,vp->y()));
-            appearance1->setEasingCurve(QEasingCurve::InCurve);
-            appearance1->start(QAbstractAnimation::DeleteWhenStopped);
+            /*QPropertyAnimation *appearance1 = new QPropertyAnimation(vp, "pos");
+            appearance1->setDuration(200);*/
+
+            if(vp->pos().x()>=totalWidth-1920)
+                vp->move(-vp->width(),0);
+
+            else if(vp->pos().x()<-1920)
+                vp->move(totalWidth-1920,0);
+
+
+
+            anims[vp->getId()]->setStartValue(vp->pos());
+            anims[vp->getId()]->setEndValue(QPoint(vp->x()+dx,vp->y()));
+            anims[vp->getId()]->setEasingCurve(QEasingCurve::InCurve);
+            anims[vp->getId()]->start();
+
+
 
             //vp->move(vp->pos().x()+dx,vp->pos().y());
 
-            if(vp->pos().x()<-vp->width())
-            {
-                vp->move(totalWidth-vp->width(),0);
-            }
-            else if(vp->pos().x()+vp->width()>totalWidth)
-            {
 
-                vp->move(-vp->width(),0);
-            }
 
         }
 
@@ -122,7 +134,7 @@ void mainScreen::moveVideo(int dx)
 
             mainVp-> command(QStringList()<< "seek"<<QString::number(percent)<<"absolute-percent"<<"exact");
 
-          mainVp->setProperty("pause", true);
+            mainVp->setProperty("pause", true);
 
             if(mainVp->getProperty("time-pos").toDouble()<=0)
             {
@@ -138,7 +150,22 @@ void mainScreen::moveVideo(int dx)
 
 }
 
+void mainScreen::checkVideoPosition(void)
+{
+    return;
 
+    QPropertyAnimation *anim = (QPropertyAnimation*)QObject::sender() ;
+    mpvWidget *vp = (mpvWidget*)anim->targetObject();
+    if(vp->pos().x()<-vp->width())
+    {
+        vp->move(totalWidth-vp->width(),0);
+    }
+    else if(vp->pos().x()>=totalWidth)
+    {
+        vp->move(-vp->width(),0);
+    }
+
+}
 
 
 
@@ -175,9 +202,18 @@ void mainScreen::loadContent(QStringList content)
     {
         vp->close();
         vp->deleteLater();
+
     }
     mainVp = NULL;
     vps.clear();
+
+
+    for(QPropertyAnimation *anim:anims)
+        anim->deleteLater();
+
+    anims.clear();
+
+
     totalWidth = 0;
     isPlaying = false;
     contentList.clear();
@@ -192,6 +228,7 @@ void mainScreen::loadContent(QStringList content)
         vp->setProperty("mute",true);
         vps.push_back(vp);
         vp->setAttribute( Qt::WA_TransparentForMouseEvents );
+        vp->setId(i);
         totalWidth+=vp->width();
         if(vp->x()==1920)
         {
@@ -200,8 +237,13 @@ void mainScreen::loadContent(QStringList content)
         }
 
 
+        QPropertyAnimation *anim = new QPropertyAnimation(vp, "pos");
+        anim->setDuration(ANIM_DURATION);
+        anim->setEasingCurve(QEasingCurve::Linear);
+       // connect(anim,SIGNAL(finished()),this,SLOT(checkVideoPosition()));
+        anims.push_back(anim);
     }
-   QTimer::singleShot(500, this, SLOT(startVideos()));
+    QTimer::singleShot(100, this, SLOT(startVideos()));
 
 
 }
@@ -213,12 +255,12 @@ void mainScreen::keyPressEvent(QKeyEvent *ev)
     if(ev->key() == 16777236)//forward
     {
 
-        moveVideo(50);
+        moveVideo(ANIM_MAG);
 
     }
     if(ev->key() == 16777234)//backward
     {
-        moveVideo(-50);
+        moveVideo(-ANIM_MAG);
 
     }
 }
@@ -228,7 +270,7 @@ void mainScreen::keyPressEvent(QKeyEvent *ev)
 
 void mainScreen::mousePressEvent(QMouseEvent *event)
 {
-if(DEBUG)
-    emit forceStop();
+    if(DEBUG)
+        emit forceStop();
 
 }
