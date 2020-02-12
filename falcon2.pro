@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui serialport
 CONFIG += c++14
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -19,13 +19,15 @@ PKGCONFIG += mpv
 SOURCES += main.cpp \
     mpvwidget.cpp \
     mainscreen.cpp \
-    acr122u.cpp
+    acr122u.cpp \
+    serialwatcher.cpp
 
 
 HEADERS  += \
     mpvwidget.h \
     mainscreen.h \
-    acr122u.h
+    acr122u.h \
+    serialwatcher.h
 
 
 FORMS    +=

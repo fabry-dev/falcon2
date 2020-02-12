@@ -7,7 +7,7 @@
 #include "QPushButton"
 #include "qmessagebox.h"
 #include "acr122u.h"
-
+#include "serialwatcher.h"
 #define PATH_DEFAULT (QString)"/home/fred/Dropbox/Taf/PTL/falcon2/files/"
 
 
@@ -79,9 +79,13 @@ int main(int argc, char *argv[])
 
 
 
+
+
+
+
     mainScreen * ms = new mainScreen(NULL,PATH,DEBUG);
     ms->setGeometry(a.screens()[0]->geometry().x(),a.screens()[0]->geometry().y(),1920,1080);
-   ms->showFullScreen();
+  // ms->showFullScreen();
 
    a.connect(ms,SIGNAL(forceStop()),&a,SLOT(closeAllWindows()));
 
@@ -89,6 +93,8 @@ int main(int argc, char *argv[])
     a.connect(rfidWatcher,SIGNAL(getUID(QString)),ms,SLOT(getUID(QString)));
 
 
+
+    serialWatcher * serialwatch = new serialWatcher(NULL);
 /*
     if(DEBUG)
     {
