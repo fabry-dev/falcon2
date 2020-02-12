@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 
 
 
-    mainScreen * ms = new mainScreen(NULL,PATH);
+    mainScreen * ms = new mainScreen(NULL,PATH,DEBUG);
     ms->setGeometry(a.screens()[0]->geometry().x(),a.screens()[0]->geometry().y(),1920,1080);
    ms->showFullScreen();
 

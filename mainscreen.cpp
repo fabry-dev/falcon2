@@ -3,10 +3,10 @@
 #include "qdebug.h"
 #include "qpainter.h"
 
+#include "qpropertyanimation.h"
 
 
-
-mainScreen::mainScreen(QLabel *parent, QString PATH) : QLabel(parent),PATH(PATH)
+mainScreen::mainScreen(QLabel *parent, QString PATH,bool DEBUG) : QLabel(parent),PATH(PATH),DEBUG(DEBUG)
 {
 
     resize(1920,1080);
@@ -70,9 +70,14 @@ void mainScreen::moveVideo(int dx)
             else
                 vp->show();
 
+            QPropertyAnimation *appearance1 = new QPropertyAnimation(vp, "pos");
+            appearance1->setDuration(200);
+            appearance1->setStartValue(vp->pos());
+            appearance1->setEndValue(QPoint(vp->x()+dx,vp->y()));
+            appearance1->setEasingCurve(QEasingCurve::InCurve);
+            appearance1->start(QAbstractAnimation::DeleteWhenStopped);
 
-
-            vp->move(vp->pos().x()+dx,vp->pos().y());
+            //vp->move(vp->pos().x()+dx,vp->pos().y());
 
             if(vp->pos().x()<-vp->width())
             {
@@ -83,6 +88,7 @@ void mainScreen::moveVideo(int dx)
 
                 vp->move(-vp->width(),0);
             }
+
         }
 
     }
@@ -207,12 +213,12 @@ void mainScreen::keyPressEvent(QKeyEvent *ev)
     if(ev->key() == 16777236)//forward
     {
 
-        moveVideo(10);
+        moveVideo(50);
 
     }
     if(ev->key() == 16777234)//backward
     {
-        moveVideo(-10);
+        moveVideo(-50);
 
     }
 }
@@ -222,7 +228,7 @@ void mainScreen::keyPressEvent(QKeyEvent *ev)
 
 void mainScreen::mousePressEvent(QMouseEvent *event)
 {
-
-emit forceStop();
+if(DEBUG)
+    emit forceStop();
 
 }

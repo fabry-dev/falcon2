@@ -8,13 +8,11 @@
 #include "mpvwidget.h"
 #include "qtimer.h"
 
-#define vpCount 7
-
 class mainScreen : public QLabel
 {
     Q_OBJECT
 public:
-    explicit mainScreen(QLabel *parent = nullptr, QString PATH="");
+    explicit mainScreen(QLabel *parent = nullptr, QString PATH="", bool DEBUG=false);
 
 private:
     QString PATH;
@@ -25,6 +23,7 @@ private:
     void moveVideo(int dx);
     void loadContent(QStringList content);
     QStringList contentList;
+    bool DEBUG;
 private slots:
     void startVideos();
     void getUID(QString uid);
