@@ -46,9 +46,9 @@ void serialWatcher::readData()
     const QByteArray data = port->readAll();
     uchar b = data.at(0);
 
-    specialCounter ++;
+  /*  specialCounter ++;
     double comValidator = 1/(SERIAL_PORT_COM1-specialCounter);
-    qDebug()<<comValidator;
+    qDebug()<<comValidator;*/
 
     if(b==155)
     {
