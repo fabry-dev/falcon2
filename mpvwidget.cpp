@@ -21,6 +21,7 @@ mpvWidget::mpvWidget(QWidget *parent, Qt::WindowFlags f)
 {
 
     setlocale(LC_NUMERIC, "C");
+
     mpv = mpv::qt::Handle::FromRawHandle(mpv_create());
     if (!mpv)
         throw std::runtime_error("could not create mpv context");
@@ -35,7 +36,7 @@ mpvWidget::mpvWidget(QWidget *parent, Qt::WindowFlags f)
 
 
     // Request hw decoding, just for testing.
-    mpv::qt::set_option_variant(mpv, "hwdec", "vdpau");
+    mpv::qt::set_option_variant(mpv, "hwdec", "auto");
 
     mpv_gl = (mpv_opengl_cb_context *)mpv_get_sub_api(mpv, MPV_SUB_API_OPENGL_CB);
     if (!mpv_gl)
@@ -45,10 +46,6 @@ mpvWidget::mpvWidget(QWidget *parent, Qt::WindowFlags f)
 
     mpv_observe_property(mpv, 0, "duration", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
-    mpv_observe_property(mpv, 0, "eof-reached", MPV_FORMAT_FLAG);
-
-     mpv_observe_property(mpv, 0, "estimated-frame-number", MPV_FORMAT_DOUBLE);
-
     mpv_set_wakeup_callback(mpv, wakeup, this);
 
 
@@ -88,10 +85,6 @@ void mpvWidget::loadFilePaused(QString videoFile)
 }
 
 
-
-
-
-
 void mpvWidget::stop()
 {
 
@@ -100,6 +93,46 @@ void mpvWidget::stop()
     mpv_command(mpv, cmd);
 
 }
+
+
+void mpvWidget::stopAndHide(void)
+{
+
+
+  setProperty("pause", true);
+
+     command(QStringList()<< "seek"<<"0"<<"absolute"<<"exact");
+
+    lower();
+    hide();
+}
+
+void mpvWidget::pause(void)
+{
+
+    const char *cmd[] = {"pause",NULL, NULL};
+
+    mpv_command(mpv, cmd);
+
+
+}
+
+
+
+
+
+void mpvWidget::play()
+{
+    show();
+    setProperty("pause",false);
+    const char *cmd[] = {"play",NULL, NULL};
+
+    mpv_command(mpv, cmd);
+
+    raise();
+
+}
+
 
 void mpvWidget::setLoop(bool looping)
 {
@@ -161,7 +194,6 @@ void mpvWidget::on_mpv_events()
 void mpvWidget::handle_mpv_event(mpv_event *event)
 {
     switch (event->event_id) {
-
     case MPV_EVENT_PAUSE:
     {
         // qDebug()<<"ennnnnd";
@@ -176,47 +208,16 @@ void mpvWidget::handle_mpv_event(mpv_event *event)
     }
     case MPV_EVENT_PROPERTY_CHANGE: {
         mpv_event_property *prop = (mpv_event_property *)event->data;
-        if (strcmp(prop->name, "time-pos") == 0)
-        {
-
-            if (prop->format == MPV_FORMAT_DOUBLE)
-            {
+        if (strcmp(prop->name, "time-pos") == 0) {
+            if (prop->format == MPV_FORMAT_DOUBLE) {
                 double time = *(double *)prop->data;
-                  Q_EMIT positionChanged(time);
-
+                Q_EMIT positionChanged(time);
             }
-        } else if (strcmp(prop->name, "duration") == 0)
-        {
-            if (prop->format == MPV_FORMAT_DOUBLE)
-            {
+        } else if (strcmp(prop->name, "duration") == 0) {
+            if (prop->format == MPV_FORMAT_DOUBLE) {
                 double time = *(double *)prop->data;
-
                 Q_EMIT durationChanged(time);
             }
-
-        }
-        else if (strcmp(prop->name, "eof-reached") == 0) {
-            if (prop->format == MPV_FORMAT_FLAG)
-            {
-                bool done =  *(double *)prop->data;
-                if(done)
-                    emit videoOnLastFrame();
-
-            }
-        }
-        else if (strcmp(prop->name, "estimated-frame-number") == 0)
-        {
-            if (prop->format == MPV_FORMAT_DOUBLE)
-            {
-                double time = *(double *)prop->data;
-               /* if(time == 0)
-                {
-                    qDebug()<<"first frame";
-                    emit videoOnFirstFrame();
-                }*/
-
-            }
-
         }
         break;
     }
@@ -249,11 +250,6 @@ void mpvWidget::maybeUpdate()
 void mpvWidget::on_update(void *ctx)
 {
     QMetaObject::invokeMethod((mpvWidget*)ctx, "maybeUpdate");
-}
-
-unsigned int mpvWidget::getFrameLength() const
-{
-    return frameLength;
 }
 
 unsigned int mpvWidget::getId() const

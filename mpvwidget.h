@@ -18,22 +18,22 @@ public:
     QSize sizeHint() const { return QSize(480, 270);}
     void loadFile(QString);
     void setLoop(bool looping);
-    void stop();
-    void play();
+
     void setCrop();
     void loadFilePaused(QString videoFile);
     unsigned int getId() const;
     void setId(unsigned int value);
-
-    unsigned int getFrameLength() const;
+public slots:
+    void pause(void);
+    void stopAndHide(void);
+    void stop();
+    void play();
 
 signals:
     void durationChanged(int value);
     void positionChanged(int value);
     void videoOver();
     void clicked(QPoint pos);
-    void videoOnLastFrame(void);
-    void videoOnFirstFrame(void);
 protected:
     void initializeGL() Q_DECL_OVERRIDE;
     void paintGL() Q_DECL_OVERRIDE;
@@ -46,8 +46,6 @@ private:
     void handle_mpv_event(mpv_event *event);
     static void on_update(void *ctx);
     unsigned int id;
-    unsigned int frameLength;
-    double duration;
 
     mpv::qt::Handle mpv;
     mpv_opengl_cb_context *mpv_gl;

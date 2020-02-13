@@ -26,12 +26,17 @@ private:
     void loadContent(QStringList content);
     QStringList contentList;
     bool DEBUG;
+    std::vector<mpvWidget*>sbVps;
+    QTimer *timeoutTimer;
+    void clearMovingPlayers(void);
 private slots:
     void startVideos();
     void getUID(QString uid);
     void checkVideoPosition(void);
     void goBackward(void);
     void goForward(void);
+    void standbyScreen(void);
+    void preloadStandbyScreen(void);
 
 protected:
      void keyPressEvent(QKeyEvent *ev);

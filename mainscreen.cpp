@@ -6,6 +6,8 @@
 #define ANIM_MAG 1920/40
 #define ANIM_DURATION 100
 
+#define TIMEOUT_VAL 30*1000
+
 
 mainScreen::mainScreen(QLabel *parent, QString PATH,bool DEBUG) : QLabel(parent),PATH(PATH),DEBUG(DEBUG)
 {
@@ -17,9 +19,61 @@ mainScreen::mainScreen(QLabel *parent, QString PATH,bool DEBUG) : QLabel(parent)
     isPlaying = false;
 
 
-    getUID("9723E0DF9000");
+
+    timeoutTimer = new QTimer(this);
+    connect(timeoutTimer,SIGNAL(timeout()),this,SLOT(standbyScreen()));
 
 
+
+
+    //getUID("9723E0DF9000");
+
+    for(int i = 0;i<3;i++)
+    {
+        mpvWidget *vp = new mpvWidget(this);
+        vp->resize(1920,1080);
+        vp->move(1920*i,0);
+        vp->setLoop(true);
+        vp->setProperty("keep-open",true);
+        vp->setProperty("mute",true);
+        vp->setAttribute( Qt::WA_TransparentForMouseEvents );
+        vp->setId(i);
+
+        sbVps.push_back(vp);
+    }
+
+
+
+    QTimer::singleShot(50,this,SLOT(preloadStandbyScreen()));
+
+}
+
+
+void mainScreen::preloadStandbyScreen(void)
+{
+    for(auto vp:sbVps)
+        vp->loadFile(PATH+"standbyVideo"+QString::number(vp->getId())+".mp4");
+
+    standbyScreen();
+
+}
+void mainScreen::standbyScreen(void)
+{
+
+
+    for(auto vp:sbVps)
+    {
+        vp->play();
+
+    }
+
+    for(auto vp:vps)
+        vp->hide();
+
+
+     clearMovingPlayers();//remove the moving players and animation
+
+    timeoutTimer->stop();
 }
 
 void mainScreen::startVideos()
@@ -42,11 +96,16 @@ void mainScreen::startVideos()
         vp->loadFilePaused(PATH+contentList[i]);
         // vp->raise();
     }
-}
 
+    for(auto vp:sbVps)
+        vp->stopAndHide();
+
+     timeoutTimer->start(TIMEOUT_VAL);
+}
 
 void mainScreen::moveVideo(int dx)
 {
+    timeoutTimer->start(TIMEOUT_VAL);
 
     if(!isPlaying)
     {
@@ -194,24 +253,26 @@ void mainScreen::getUID(QString uid)
 }
 
 
-
-void mainScreen::loadContent(QStringList content)
+void mainScreen::clearMovingPlayers(void)
 {
-
     for(auto vp:vps)
     {
         vp->close();
         vp->deleteLater();
-
     }
     mainVp = NULL;
     vps.clear();
-
 
     for(QPropertyAnimation *anim:anims)
         anim->deleteLater();
 
     anims.clear();
+}
+
+
+void mainScreen::loadContent(QStringList content)
+{
+    clearMovingPlayers();
 
 
     totalWidth = 0;
