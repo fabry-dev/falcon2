@@ -26,7 +26,7 @@ mainScreen::mainScreen(QLabel *parent, QString PATH,bool DEBUG) : QLabel(parent)
 
 
 
-    //getUID("9723E0DF9000");
+
 
     for(int i = 0;i<3;i++)
     {
@@ -44,7 +44,9 @@ mainScreen::mainScreen(QLabel *parent, QString PATH,bool DEBUG) : QLabel(parent)
 
 
 
-    QTimer::singleShot(50,this,SLOT(preloadStandbyScreen()));
+    //QTimer::singleShot(50,this,SLOT(preloadStandbyScreen()));
+
+    getUID("9723E0DF9000");
 
 }
 
@@ -59,19 +61,16 @@ void mainScreen::preloadStandbyScreen(void)
 }
 void mainScreen::standbyScreen(void)
 {
-
-
     for(auto vp:sbVps)
     {
         vp->play();
-
     }
 
     for(auto vp:vps)
         vp->hide();
 
 
-     clearMovingPlayers();//remove the moving players and animation
+    clearMovingPlayers();//remove the moving players and animation
 
     timeoutTimer->stop();
 }
@@ -100,12 +99,31 @@ void mainScreen::startVideos()
     for(auto vp:sbVps)
         vp->stopAndHide();
 
-     timeoutTimer->start(TIMEOUT_VAL);
+    timeoutTimer->start(TIMEOUT_VAL);
 }
 
 void mainScreen::moveVideo(int dx)
 {
     timeoutTimer->start(TIMEOUT_VAL);
+
+
+    for(auto vp:vps)
+    {
+
+
+        if(vp->pos().x()>=2*1920)
+        {
+            setVideoFocus(vp,false);
+        }
+        else if(vp->pos().x()>1920)
+            setVideoFocus(vp,true);
+        else if(vp->pos().x()>0)
+            setVideoFocus(vp,true);
+        else
+            setVideoFocus(vp,false);
+
+
+    }
 
     if(!isPlaying)
     {
@@ -121,25 +139,24 @@ void mainScreen::moveVideo(int dx)
         {
             if((vp->pos().x()>1920) && (vp->pos().x()+dx<=1920)&&(mainVp!=vp))
             {
-
                 mainVp = vp;
                 isPlaying = true;
-
+                mainVp->setZoom(0);
                 //entrée par la droite
             }
             else  if((vp->pos().x()<1920) && (vp->pos().x()+dx>=1920)&&(mainVp!=vp))
             {
-
                 mainVp = vp;
                 isPlaying = true;
-
+                mainVp->setZoom(0);
                 //entrée par la gauche
             }
-            else
-                vp->show();
+
+
+
 
             /*QPropertyAnimation *appearance1 = new QPropertyAnimation(vp, "pos");
-            appearance1->setDuration(200);*/
+                    appearance1->setDuration(200);*/
 
             if(vp->pos().x()>=totalWidth-1920)
                 vp->move(-vp->width(),0);
@@ -209,22 +226,6 @@ void mainScreen::moveVideo(int dx)
 
 }
 
-void mainScreen::checkVideoPosition(void)
-{
-    return;
-
-    QPropertyAnimation *anim = (QPropertyAnimation*)QObject::sender() ;
-    mpvWidget *vp = (mpvWidget*)anim->targetObject();
-    if(vp->pos().x()<-vp->width())
-    {
-        vp->move(totalWidth-vp->width(),0);
-    }
-    else if(vp->pos().x()>=totalWidth)
-    {
-        vp->move(-vp->width(),0);
-    }
-
-}
 
 
 
@@ -290,12 +291,22 @@ void mainScreen::loadContent(QStringList content)
         vps.push_back(vp);
         vp->setAttribute( Qt::WA_TransparentForMouseEvents );
         vp->setId(i);
+        vp->setProperty("vf-add",QStringList()<<"eq"<<"brightness"<<"0.6");
+
+
+
         totalWidth+=vp->width();
         if(vp->x()==1920)
         {
             isPlaying = true;
             mainVp = vp;
+            setVideoFocus(vp,true);
         }
+        else
+            setVideoFocus(vp,false);
+
+
+
 
 
         QPropertyAnimation *anim = new QPropertyAnimation(vp, "pos");
@@ -305,6 +316,23 @@ void mainScreen::loadContent(QStringList content)
         anims.push_back(anim);
     }
     QTimer::singleShot(100, this, SLOT(startVideos()));
+
+
+}
+
+
+void mainScreen::setVideoFocus(mpvWidget *vp,bool focus)
+{
+    if(focus)
+    {
+       // vp->setPropertyString("vf","eq=brightness=\"0\"");
+        vp->setZoom(0);
+    }
+    else
+    {
+      //  vp->setPropertyString("vf","eq=brightness=\"0.5\"");
+        vp->setZoom(0.5);
+    }
 
 
 }

@@ -59,7 +59,7 @@ void serialWatcher::readData()
             if(top_count == max_top_count)
             {
                 top_count = 0;
-                emit goForward();
+                emit goBackward();
             }
         }
 
@@ -72,7 +72,7 @@ void serialWatcher::readData()
             if(top_count == -max_top_count)
             {
                 top_count = 0;
-                emit goBackward();
+                emit goForward();
             }
         }
     }

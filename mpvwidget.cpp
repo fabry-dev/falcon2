@@ -152,9 +152,23 @@ void mpvWidget::setCrop()
 
 
 
+void mpvWidget::setZoom(double zoomLevel)
+{
+    return;
+    mpv::qt::set_option_variant(mpv, "video-zoom",QString::number(zoomLevel));
+}
+
+
 void mpvWidget::setProperty(const QString& name, const QVariant& value)
 {
     mpv::qt::set_property_variant(mpv, name, value);
+}
+
+
+void mpvWidget::setPropertyString(const QString & name, const QString & txt)
+{
+    mpv_set_option_string(mpv, name.toStdString().c_str(), txt.toStdString().c_str());
+
 }
 
 QVariant mpvWidget::getProperty(const QString &name) const

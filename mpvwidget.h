@@ -23,6 +23,8 @@ public:
     void loadFilePaused(QString videoFile);
     unsigned int getId() const;
     void setId(unsigned int value);
+    void setZoom(double zoomLevel);
+    void setPropertyString(const QString & name, const QString & txt);
 public slots:
     void pause(void);
     void stopAndHide(void);

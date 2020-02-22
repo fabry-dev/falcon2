@@ -29,10 +29,11 @@ private:
     std::vector<mpvWidget*>sbVps;
     QTimer *timeoutTimer;
     void clearMovingPlayers(void);
+    void setVideoFocus(mpvWidget *vp,bool focus);
 private slots:
     void startVideos();
     void getUID(QString uid);
-    void checkVideoPosition(void);
+
     void goBackward(void);
     void goForward(void);
     void standbyScreen(void);
