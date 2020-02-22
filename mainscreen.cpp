@@ -44,9 +44,9 @@ mainScreen::mainScreen(QLabel *parent, QString PATH,bool DEBUG) : QLabel(parent)
 
 
 
-    //QTimer::singleShot(50,this,SLOT(preloadStandbyScreen()));
+    QTimer::singleShot(50,this,SLOT(preloadStandbyScreen()));
 
-    getUID("9723E0DF9000");
+ //   getUID("9723E0DF9000");
 
 }
 
