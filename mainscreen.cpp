@@ -44,7 +44,7 @@ mainScreen::mainScreen(QLabel *parent, QString PATH,bool DEBUG) : QLabel(parent)
 
 
 
-    QTimer::singleShot(50,this,SLOT(preloadStandbyScreen()));
+   QTimer::singleShot(50,this,SLOT(preloadStandbyScreen()));
 
    // getUID("9723E0DF9000");
 
@@ -115,9 +115,16 @@ void mainScreen::moveVideo(int dx)
 
     if(dx<0)
     {
-        for (auto vp:vps)
-            vp-> command(QStringList()<< "frame-step");
 
+        for (auto vp:vps)
+        {
+            vp-> command(QStringList()<< "frame-step");
+            double percent = vp->getProperty("percent-pos").toDouble();
+            //qDebug()<<percent;
+            if(percent>=97)
+                vp-> command(QStringList()<< "seek"<<QString::number(0)<<"absolute-percent"<<"exact");
+
+        }
     }
  else if(dx>0)
     {
@@ -126,7 +133,8 @@ void mainScreen::moveVideo(int dx)
         {
             double percent = vp->getProperty("percent-pos").toDouble();
             percent-=5;
-            if(percent > 0)
+            if(percent <0)
+                percent = 0;
             vp-> command(QStringList()<< "seek"<<QString::number(percent)<<"absolute-percent"<<"exact");
             vp->setProperty("pause", true);
         }
